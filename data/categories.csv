@@ -1,0 +1,57 @@
+category,sources,latest_year,max_rank,num_schools
+USA Overall,Times,2022,601,560
+Global,"QS, Times, USNews",2023,1201,230
+Economics,"Collegevine/Niche, QS",2022,451,154
+Chemistry,"Collegevine/Niche, QS",2022,601,154
+Physics,"Niche, QS",2022,551,154
+Computer Science,"Collegevine/Niche, Niche, QS",2022,601,153
+Biology,"Niche, QS",2022,601,152
+English,"Collegevine/Niche, QS",2022,251,140
+Psychology,"Collegevine/Niche, QS",2022,251,138
+Business,"Collegevine/Niche, QS",2022,501,132
+Film & Media,"Collegevine/Niche, Niche, QS",2022,201,132
+Environmental Science,"Niche, QS",2022,401,132
+Mathematics,"Niche, QS",2022,451,130
+Accounting & Finance,"CollegeVine, Niche, QS",2022,251,130
+Medicine,QS,2021,601,129
+Political Science,"Collegevine/Niche, Niche, QS",2022,210,123
+Engineering,"Collegevine/Niche, QS",2022,501,113
+Art & Design,"Niche, QS",2022,201,111
+Natural Sciences,QS,2021,451,108
+History,"Collegevine/Niche, QS",2022,151,107
+Arts & Humanities,QS,2021,451,103
+Pre-Med,CollegeVine,2022,105,100
+Social Sciences,QS,2021,501,100
+Engineering (Mechanical),QS,2021,451,96
+Philosophy,"Niche, QS",2022,151,96
+Education,QS,2021,301,94
+Anthropology,"Niche, QS",2022,101,92
+Engineering (Chemical),QS,2021,351,90
+Engineering (Electrical),QS,2021,451,87
+Materials Science,QS,2021,351,87
+Public Policy,"Niche, QS",2022,101,80
+Languages,QS,2021,301,71
+Agriculture,QS,2021,351,68
+Pharmacy,QS,2021,301,66
+Architecture,"CollegeVine, QS",2022,201,65
+Liberal Arts,USNews/Niche,2022,131,65
+Sociology,QS,2021,315,63
+Earth Sciences,QS,2021,151,63
+Archaeology,QS,2021,201,60
+Public Health,Niche,2022,75,57
+Sports,"Niche, QS",2022,101,54
+Law,QS,2021,301,52
+Nursing,QS,2021,101,50
+Geography,QS,2021,151,37
+Engineering (Civil),QS,2021,151,35
+Anatomy & Physiology,QS,2021,101,35
+Religious Studies,QS,2021,101,31
+Hospitality,QS,2021,51,26
+Engineering (Petroleum),QS,2021,101,25
+Library Science,QS,2021,47,24
+Development Studies,QS,2021,51,24
+Performing Arts,QS,2021,51,22
+Veterinary Science,QS,2021,50,19
+Dentistry,QS,2021,60,17
+Engineering (Mining),QS,2021,51,13
+Classics,QS,2021,51,13
