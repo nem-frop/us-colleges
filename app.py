@@ -426,6 +426,14 @@ def main():
             },
         }
 
+        # Add Subject Rankings as a special dynamic group (based on selected categories)
+        include_subject_rankings = st.checkbox(
+            "Subject Rankings (selected categories)",
+            value=False,
+            key="exp_subject_rankings",
+            help="Include rank for each selected subject area"
+        )
+
         # Default selections
         default_selected = [
             "Core Info (always included)",
@@ -464,6 +472,14 @@ def main():
         available_export_cols = [c for c in export_cols_map.keys() if c in filtered.columns]
         export_df = filtered[available_export_cols].copy()
         export_df.columns = [export_cols_map[c] for c in available_export_cols]
+
+        # Add subject rankings if selected
+        if include_subject_rankings:
+            for cat in selected_categories:
+                col_name = f"Rank: {cat}"
+                export_df[col_name] = filtered['category_scores'].apply(
+                    lambda x: x.get(cat, {}).get('rank', '') if isinstance(x, dict) else ''
+                )
 
         # Format percentages - some are decimals (0.13), some are already percentages (13)
         # Columns stored as decimals (need *100)
