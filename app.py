@@ -434,6 +434,16 @@ def main():
             help="Include rank for each selected subject area"
         )
 
+        # Row limit for export
+        max_rows = st.number_input(
+            "Max rows to export",
+            min_value=10,
+            max_value=len(filtered),
+            value=min(150, len(filtered)),
+            step=10,
+            help="Limit the number of universities in the export"
+        )
+
         # Default selections
         default_selected = [
             "Core Info (always included)",
@@ -468,16 +478,16 @@ def main():
         for group_name in selected_groups:
             export_cols_map.update(export_column_groups[group_name])
 
-        # Filter to available columns
+        # Filter to available columns and apply row limit
         available_export_cols = [c for c in export_cols_map.keys() if c in filtered.columns]
-        export_df = filtered[available_export_cols].copy()
+        export_df = filtered[available_export_cols].head(max_rows).copy()
         export_df.columns = [export_cols_map[c] for c in available_export_cols]
 
         # Add subject rankings if selected
         if include_subject_rankings:
             for cat in selected_categories:
                 col_name = f"Rank: {cat}"
-                export_df[col_name] = filtered['category_scores'].apply(
+                export_df[col_name] = filtered.head(max_rows)['category_scores'].apply(
                     lambda x: x.get(cat, {}).get('rank', '') if isinstance(x, dict) else ''
                 )
 
