@@ -630,7 +630,7 @@ def main():
 
     # Footer
     st.divider()
-    st.caption("Data sources: QS World University Rankings, US News, Times Higher Education, Niche, CollegeVine, NCES IPEDS | Updated: 2022-23")
+    st.caption("Data sources: QS World University Rankings, US News, Times Higher Education, Niche, CollegeVine, NCES IPEDS | Updated: 2023-24")
 
 
 if __name__ == "__main__":

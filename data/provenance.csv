@@ -1,7 +1,7 @@
 column_group,columns,last_updated,source,notes
-admissions,"acceptance_rate,total_applicants,yield_rate,ed_acceptance_rate",2024-01,IPEDS 2022-23,Initial load
-test_scores,"sat_25_overall,sat_75_overall,sat_math_25,sat_math_75,sat_english_25,sat_english_75,act_25,act_75",2024-01,IPEDS 2022-23,Initial load
-enrollment,"undergrad_enrollment,grad_enrollment,pct_international,pct_in_state",2024-01,IPEDS 2022-23,Initial load
-costs,"tuition_fees,room_board,total_expenses",2024-01,IPEDS 2022-23,Initial load
+admissions,"acceptance_rate,total_applicants,yield_rate,ed_acceptance_rate",2026-02,NCES College Navigator 2023-24,Top 300 schools updated via scraper
+test_scores,"sat_25_overall,sat_75_overall,sat_math_25,sat_math_75,sat_english_25,sat_english_75,act_25,act_75",2026-02,NCES College Navigator 2023-24,Top 300 schools updated via scraper
+enrollment,"undergrad_enrollment,grad_enrollment,pct_international,pct_in_state",2026-02,NCES College Navigator 2023-24,Top 300 schools updated via scraper
+costs,"tuition_fees,room_board,total_expenses",2026-02,NCES College Navigator 2023-24,Top 300 schools updated (tuition only)
 outcomes,"salary_10yr",2024-01,College Scorecard,Initial load
-selectivity_zones,"selectivity_zone_general,selectivity_zone_cs_eng,selectivity_zone_econ_biz,selectivity_zone_premed",2024-01,Calculated,Based on acceptance rates
+selectivity_zones,"selectivity_zone_general,selectivity_zone_cs_eng,selectivity_zone_econ_biz,selectivity_zone_premed",2024-01,Calculated,Based on acceptance rates - needs recalc
