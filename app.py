@@ -99,11 +99,23 @@ def load_categories():
     return pd.read_csv(data_dir / "categories.csv")
 
 
-@st.cache_data
-def load_universities():
-    """Load full university data."""
-    data_dir = Path(__file__).parent / "data"
-    return pd.read_csv(data_dir / "universities.csv")
+def get_universities_from_engine(engine):
+    """Get universities DataFrame from engine (avoids loading twice)."""
+    return engine.universities
+
+
+@st.cache_data(ttl=300)
+def compute_rankings(_engine, selected_categories_tuple, selectivity_weight, coverage_penalty):
+    """
+    Cached ranking computation.
+    Note: _engine is prefixed with _ to tell Streamlit not to hash it.
+    selected_categories must be a tuple (hashable) for caching.
+    """
+    return _engine.compute_weighted_score(
+        selected_categories=list(selected_categories_tuple),
+        selectivity_factor=selectivity_weight,
+        coverage_penalty=coverage_penalty
+    )
 
 
 def format_acceptance_rate(rate):
@@ -127,7 +139,7 @@ def format_number(val):
 def main():
     engine = load_engine()
     categories_df = load_categories()
-    universities_df = load_universities()
+    universities_df = get_universities_from_engine(engine)  # Reuse from engine, don't load twice
 
     # Header
     st.markdown('<p class="main-header">US College Finder</p>', unsafe_allow_html=True)
@@ -267,33 +279,34 @@ def main():
         )
         st.stop()
 
-    # Compute rankings
+    # Compute rankings (cached based on parameters)
     with st.spinner("Computing rankings..."):
-        results = engine.compute_weighted_score(
-            selected_categories=selected_categories,
-            selectivity_factor=selectivity_weight,
-            coverage_penalty=coverage_penalty
+        results = compute_rankings(
+            engine,
+            tuple(sorted(selected_categories)),  # Tuple for hashability
+            selectivity_weight,
+            coverage_penalty
         )
 
     if results.empty:
         st.warning("No schools found matching your criteria.")
         st.stop()
 
-    # Apply filters
-    filtered = results.copy()
+    # Apply filters using boolean masks (avoids copy until needed)
+    mask = pd.Series(True, index=results.index)
 
-    if 'acceptance_rate' in filtered.columns:
-        filtered = filtered[
-            (filtered['acceptance_rate'].isna()) |
-            ((filtered['acceptance_rate'] >= acceptance_range[0]/100) &
-             (filtered['acceptance_rate'] <= acceptance_range[1]/100))
-        ]
+    if 'acceptance_rate' in results.columns:
+        mask &= (
+            results['acceptance_rate'].isna() |
+            ((results['acceptance_rate'] >= acceptance_range[0]/100) &
+             (results['acceptance_rate'] <= acceptance_range[1]/100))
+        )
 
     if selected_states:
-        filtered = filtered[filtered['state'].isin(selected_states)]
+        mask &= results['state'].isin(selected_states)
 
-    # Re-rank after filtering
-    filtered = filtered.reset_index(drop=True)
+    # Apply mask and re-rank (single copy here)
+    filtered = results.loc[mask].reset_index(drop=True)
     filtered['display_rank'] = range(1, len(filtered) + 1)
 
     # Summary

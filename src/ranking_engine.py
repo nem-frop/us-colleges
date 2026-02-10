@@ -23,9 +23,40 @@ class RankingEngine:
     """
 
     def __init__(self, universities_path: str, rankings_path: str):
-        """Load data from CSV files."""
-        self.universities = pd.read_csv(universities_path)
-        self.rankings = pd.read_csv(rankings_path)
+        """Load data from CSV files with memory-optimized dtypes."""
+        # Optimize dtypes for universities - use smaller types where possible
+        uni_dtypes = {
+            'ipeds_id': 'int32',
+            'acceptance_rate': 'float32',
+            'yield_rate': 'float32',
+            'ed_acceptance_rate': 'float32',
+            'sat_25_overall': 'float32',
+            'sat_75_overall': 'float32',
+            'sat_math_25': 'float32',
+            'sat_math_75': 'float32',
+            'sat_english_25': 'float32',
+            'sat_english_75': 'float32',
+            'act_25': 'float32',
+            'act_75': 'float32',
+            'undergrad_enrollment': 'float32',
+            'grad_enrollment': 'float32',
+            'tuition_fees': 'float32',
+            'room_board': 'float32',
+            'total_expenses': 'float32',
+            'salary_10yr': 'float32',
+            'pct_international': 'float32',
+            'pct_in_state': 'float32',
+            'total_applicants': 'float32',
+        }
+        self.universities = pd.read_csv(universities_path, dtype=uni_dtypes, low_memory=True)
+
+        # Optimize rankings - use category dtype for category column
+        self.rankings = pd.read_csv(rankings_path, dtype={
+            'ipeds_id': 'int32',
+            'rank': 'int16',
+            'max_rank': 'int16',
+        })
+        self.rankings['category'] = self.rankings['category'].astype('category')
 
         # Pre-compute category list
         self.categories = sorted(self.rankings['category'].unique())
@@ -42,18 +73,18 @@ class RankingEngine:
             'max_rank': 'max'  # Use max of the max_ranks for normalization
         }).reset_index()
 
-        # Pivot to wide format
+        # Pivot to wide format with memory-efficient dtypes
         self.rank_matrix = best_ranks.pivot(
             index='ipeds_id',
             columns='category',
             values='rank'
-        )
+        ).astype('float32')  # Use float32 instead of float64
 
         self.max_rank_matrix = best_ranks.pivot(
             index='ipeds_id',
             columns='category',
             values='max_rank'
-        )
+        ).astype('float32')
 
     def normalize_rank(self, rank: float, max_rank: float) -> float:
         """
