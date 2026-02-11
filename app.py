@@ -400,6 +400,7 @@ def main():
         display_cols = {
             'display_rank': 'Rank',
             'name': 'University',
+            'weighted_score': 'Score',
             'selectivity_zone_general': 'Zone',
             'acceptance_rate': 'Accept %',
             'state': 'State',
@@ -414,6 +415,8 @@ def main():
         display_df.columns = [display_cols[c] for c in available_display_cols]
 
         # Format columns
+        if 'Score' in display_df.columns:
+            display_df['Score'] = display_df['Score'].apply(lambda x: f"{x:.1f}" if pd.notna(x) else "")
         if 'Accept %' in display_df.columns:
             display_df['Accept %'] = display_df['Accept %'].apply(format_acceptance_rate)
         if 'Zone' in display_df.columns:
@@ -448,7 +451,7 @@ def main():
             }
         )
 
-        st.caption("**Zone** = Selectivity Zone (1=most selective, 7=most inclusive). See Export tab for subject-specific zones.")
+        st.caption("**Score** = Weighted ranking score (0-100, higher = better). **Zone** = Selectivity Zone (1=most selective, 7=most inclusive).")
 
     with tab3:
         st.subheader("Customize CSV Export")
