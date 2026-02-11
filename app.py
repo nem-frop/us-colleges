@@ -337,13 +337,14 @@ def main():
             - Custom weighted ranking algorithm
             """)
 
-            st.subheader("🚧 Coming Soon")
+            st.subheader("⚠️ Known Gaps")
             st.markdown("""
-            - **Pre-Med, Public Health, Public Policy** rankings update (currently 2022 data)
-            - **Niche rankings refresh** for 30+ subject categories
-            - **University comparison** feature (side-by-side)
-            - **Tuition & enrollment filters**
-            - **Saved searches** and bookmarks
+            **Rankings still on 2022 data:**
+            - Pre-Med, Public Health, Public Policy
+            - Film & Media, Engineering (general)
+            - Social Sciences (2021)
+
+            *Updates in progress - check back soon!*
             """)
 
         st.divider()
