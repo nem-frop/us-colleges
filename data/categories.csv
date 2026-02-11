@@ -1,45 +1,45 @@
 category,sources,latest_year,max_rank,num_schools
-USA Overall,Times,2026,171,160
-Global,"QS, Times, USNews",2026,1401,196
-Economics,"Collegevine/Niche, QS",2025,551,155
-Chemistry,"Collegevine/Niche, QS",2025,601,141
-Physics,"Niche, QS",2025,601,143
-Computer Science,"Collegevine/Niche, Niche, QS",2025,751,151
-Biology,"Niche, QS",2025,651,138
-English,"Collegevine/Niche, QS",2025,301,127
-Psychology,"Collegevine/Niche, QS",2025,301,131
-Business,"Collegevine/Niche, QS",2025,601,122
-Film & Media,"Collegevine/Niche, Niche, QS",2022,201,132
-Environmental Science,"Niche, QS",2025,501,124
-Mathematics,"Niche, QS",2025,501,119
-Accounting & Finance,"CollegeVine, Niche, QS",2025,301,123
+USA Overall,"Times, USNews",2026,436,296
+Global,"QS, QS, Times, QS, Times, USNews, QS, USNews, Times, Times, USNews",2026,1401,196
+Economics,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,551,155
+Chemistry,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,601,141
+Physics,"Niche, Niche, QS, QS",2025,601,143
+Computer Science,"Collegevine/Niche, Collegevine/Niche, Niche, Collegevine/Niche, Niche, QS, Collegevine/Niche, QS, Niche, Niche, QS, QS",2025,751,151
+Biology,"Niche, Niche, QS, QS",2025,651,138
+English,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,301,127
+Psychology,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,301,131
+Business,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,601,122
+Film & Media,"Collegevine/Niche, Collegevine/Niche, Niche, Collegevine/Niche, Niche, QS, Collegevine/Niche, QS, Niche, Niche, QS, QS",2022,201,132
+Environmental Science,"Niche, Niche, QS, QS",2025,501,124
+Mathematics,"Niche, Niche, QS, QS",2025,501,119
+Accounting & Finance,"CollegeVine, CollegeVine, Niche, CollegeVine, Niche, QS, CollegeVine, QS, Niche, Niche, QS, QS",2025,301,123
 Medicine,QS,2025,701,117
-Political Science,"Collegevine/Niche, Niche, QS",2025,301,134
-Engineering,"Collegevine/Niche, QS",2022,501,113
-Art & Design,"Niche, QS",2025,201,117
+Political Science,"Collegevine/Niche, Collegevine/Niche, Niche, Collegevine/Niche, Niche, QS, Collegevine/Niche, QS, Niche, QS",2025,301,134
+Engineering,"Collegevine/Niche, Collegevine/Niche, QS, QS",2022,501,113
+Art & Design,"Niche, Niche, QS, QS",2025,201,117
 Natural Sciences,QS,2025,501,91
-History,"Collegevine/Niche, QS",2025,201,104
+History,"Collegevine/Niche, Collegevine/Niche, QS, QS",2025,201,104
 Arts & Humanities,QS,2025,501,83
 Pre-Med,CollegeVine,2022,105,100
 Social Sciences,QS,2021,501,100
 Engineering (Mechanical),QS,2025,501,86
-Philosophy,"Niche, QS",2025,201,94
+Philosophy,"Niche, Niche, QS, QS",2025,201,94
 Education,QS,2025,401,91
-Anthropology,"Niche, QS",2025,101,98
+Anthropology,"Niche, Niche, QS, QS",2025,101,98
 Engineering (Chemical),QS,2025,401,75
 Engineering (Electrical),QS,2025,501,76
 Materials Science,QS,2025,401,84
-Public Policy,"Niche, QS",2022,101,80
+Public Policy,"Niche, Niche, QS, QS",2022,101,80
 Languages,QS,2025,301,55
 Agriculture,QS,2025,401,58
 Pharmacy,QS,2025,351,54
-Architecture,"CollegeVine, QS",2025,201,60
+Architecture,"CollegeVine, CollegeVine, QS, QS",2025,201,60
 Liberal Arts,"USNews, USNews/Niche",2026,207,130
 Sociology,QS,2025,301,68
 Earth Sciences,QS,2025,201,63
 Archaeology,QS,2025,201,43
 Public Health,Niche,2022,75,57
-Sports,"Niche, QS",2025,101,57
+Sports,"Niche, Niche, QS, QS",2025,101,57
 Law,QS,2025,351,60
 Nursing,QS,2025,151,56
 Geography,QS,2025,201,40
