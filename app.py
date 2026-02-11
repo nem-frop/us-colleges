@@ -313,8 +313,8 @@ def main():
     st.subheader(f"Results: {len(filtered)} Universities")
     st.caption(f"Ranked by: {', '.join(selected_categories)}")
 
-    # Two tabs layout
-    tab1, tab2, tab3 = st.tabs(["Rankings", "University Details", "Export Data"])
+    # Tabs layout
+    tab1, tab2, tab3, tab4 = st.tabs(["Rankings", "University Details", "Export Data", "About & Updates"])
 
     with tab1:
         # Clean table view - with Selectivity Zones prominently displayed
@@ -641,9 +641,74 @@ def main():
                 else:
                     st.write("No subject ranking data available for selected categories.")
 
+    with tab4:
+        st.subheader("About US College Finder")
+        st.write("""
+        This tool helps students discover US universities based on their academic interests.
+        Select subjects you're interested in, and we'll rank schools based on their strength in those areas.
+        """)
+
+        st.divider()
+        st.subheader("Data Sources")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            **Rankings Data:**
+            - QS World University Rankings 2025-26
+            - Times Higher Education 2026
+            - US News & World Report 2026
+            - Niche College Rankings
+            - CollegeVine Rankings
+            """)
+        with col2:
+            st.markdown("""
+            **University Statistics:**
+            - NCES IPEDS 2023-24
+            - College Navigator
+            - Common Data Sets
+            """)
+
+        st.divider()
+        st.subheader("Recent Updates")
+
+        st.markdown("""
+        **February 2025 - Major Rankings Refresh**
+        - Updated 50 subject categories to 2025-26 data
+        - Added QS Subject Rankings 2025 (47 subjects, 2,944 entries)
+        - Added QS Global Rankings 2026
+        - Added Times Higher Ed Global & US National 2026
+        - Added US News Liberal Arts 2026
+        - Total: 5,830 ranking entries across 56 categories
+
+        **February 2025 - Performance Improvements**
+        - Optimized memory usage for faster loading
+        - Added caching for ranking computations
+        - Improved filtering efficiency
+
+        **January 2025 - Initial Launch**
+        - Launched with 599 US universities
+        - 56 academic subject categories
+        - Custom weighted ranking algorithm
+        - Export functionality with customizable columns
+        """)
+
+        st.divider()
+        st.subheader("How Rankings Work")
+
+        st.markdown("""
+        1. **Select Subjects**: Choose academic areas you're interested in from the sidebar
+        2. **Weighted Scoring**: Each school gets a score (0-100) for each subject based on their rank
+        3. **Selectivity Boost**: Optionally boost more selective schools in the rankings
+        4. **Breadth Requirement**: Optionally penalize schools that aren't ranked in all your selected subjects
+        5. **Final Rank**: Schools are sorted by their combined weighted score
+        """)
+
+        st.info("**Tip:** The 'Zone' column shows selectivity (1 = most selective, 7 = most accessible). Different zones exist for CS/Engineering, Business/Economics, and Pre-Med tracks.")
+
     # Footer
     st.divider()
-    st.caption("Data sources: QS World University Rankings, US News, Times Higher Education, Niche, CollegeVine, NCES IPEDS | Updated: 2023-24")
+    st.caption("Data sources: QS World University Rankings, US News, Times Higher Education, Niche, CollegeVine, NCES IPEDS | Rankings: 2025-26")
 
 
 if __name__ == "__main__":

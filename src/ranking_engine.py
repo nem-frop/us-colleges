@@ -68,7 +68,7 @@ class RankingEngine:
         """Build efficient lookup structures for rankings."""
         # For each university and category, store the best rank
         # (some universities have multiple ranks in same category from different sources)
-        best_ranks = self.rankings.groupby(['ipeds_id', 'category']).agg({
+        best_ranks = self.rankings.groupby(['ipeds_id', 'category'], observed=True).agg({
             'rank': 'min',  # Best (lowest) rank
             'max_rank': 'max'  # Use max of the max_ranks for normalization
         }).reset_index()
