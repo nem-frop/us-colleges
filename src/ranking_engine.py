@@ -65,26 +65,46 @@ class RankingEngine:
         self._build_rank_matrix()
 
     def _build_rank_matrix(self):
-        """Build efficient lookup structures for rankings."""
-        # For each university and category, store the best rank
-        # (some universities have multiple ranks in same category from different sources)
-        best_ranks = self.rankings.groupby(['ipeds_id', 'category'], observed=True).agg({
-            'rank': 'min',  # Best (lowest) rank
-            'max_rank': 'max'  # Use max of the max_ranks for normalization
+        """Build efficient lookup structures for rankings.
+
+        For schools with multiple rankings in the same category (from different sources),
+        we compute a normalized score for each and average them. This properly accounts
+        for different scales (e.g., rank 3/1000 is much better than rank 3/50).
+        """
+        # First, compute normalized score for each ranking entry
+        # Score = 100 * (1 - (rank - 1) / (max_rank - 1))
+        # This gives: rank 1 = 100, rank max = 0
+        rankings_with_score = self.rankings.copy()
+        rankings_with_score['norm_score'] = rankings_with_score.apply(
+            lambda row: 100 * (1 - (row['rank'] - 1) / (row['max_rank'] - 1))
+                        if row['max_rank'] > 1 else 100.0,
+            axis=1
+        ).astype('float32')
+
+        # For each university and category, average the normalized scores across sources
+        # This properly weights rankings by their scale (3/1000 >> 3/50)
+        avg_scores = rankings_with_score.groupby(['ipeds_id', 'category'], observed=True).agg({
+            'norm_score': 'mean',  # Average normalized score across sources
+            'max_rank': 'max'      # Keep max for reference
         }).reset_index()
 
         # Pivot to wide format with memory-efficient dtypes
-        self.rank_matrix = best_ranks.pivot(
+        self.score_matrix = avg_scores.pivot(
             index='ipeds_id',
             columns='category',
-            values='rank'
-        ).astype('float32')  # Use float32 instead of float64
+            values='norm_score'
+        ).astype('float32')
 
-        self.max_rank_matrix = best_ranks.pivot(
+        self.max_rank_matrix = avg_scores.pivot(
             index='ipeds_id',
             columns='category',
             values='max_rank'
         ).astype('float32')
+
+        # For backward compatibility, also create rank_matrix (derived from scores)
+        # This is approximate but allows old code to work
+        self.rank_matrix = self.score_matrix.copy()
+        # No longer used directly for scoring, but kept for category lookups
 
     def normalize_rank(self, rank: float, max_rank: float) -> float:
         """
@@ -137,26 +157,28 @@ class RankingEngine:
         valid_categories = [cat for cat in selected_categories if cat in self.rank_matrix.columns]
         num_valid_categories = len(valid_categories)
 
-        # Compute normalized scores for each category
+        # Use pre-computed normalized scores (averaged across sources per category)
         results = []
-        for ipeds_id in self.rank_matrix.index:
+        for ipeds_id in self.score_matrix.index:
             scores = []
             weights = []
             category_scores = {}
 
             for cat in selected_categories:
-                if cat not in self.rank_matrix.columns:
+                if cat not in self.score_matrix.columns:
                     continue
 
-                rank = self.rank_matrix.loc[ipeds_id, cat]
+                # Get the pre-averaged normalized score for this category
+                score = self.score_matrix.loc[ipeds_id, cat]
                 max_rank = self.max_rank_matrix.loc[ipeds_id, cat]
 
-                if pd.notna(rank):
-                    score = self.normalize_rank(rank, max_rank)
+                if pd.notna(score):
                     scores.append(score)
                     weights.append(norm_weights[cat])
+                    # Approximate rank from score for display purposes
+                    approx_rank = int(1 + (100 - score) * (max_rank - 1) / 100) if max_rank > 1 else 1
                     category_scores[cat] = {
-                        'rank': int(rank),
+                        'rank': approx_rank,
                         'max_rank': int(max_rank) if pd.notna(max_rank) else None,
                         'score': round(score, 1)
                     }
