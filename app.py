@@ -337,6 +337,15 @@ def main():
             - Custom weighted ranking algorithm
             """)
 
+            st.subheader("🚧 Coming Soon")
+            st.markdown("""
+            - **Pre-Med, Public Health, Public Policy** rankings update (currently 2022 data)
+            - **Niche rankings refresh** for 30+ subject categories
+            - **University comparison** feature (side-by-side)
+            - **Tuition & enrollment filters**
+            - **Saved searches** and bookmarks
+            """)
+
         st.divider()
         st.subheader("📚 Available Academic Categories")
         st.dataframe(
