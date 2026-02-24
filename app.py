@@ -586,18 +586,12 @@ def main():
                     lambda x: x.get(cat, {}).get('rank', '') if isinstance(x, dict) else ''
                 )
 
-        # Format percentages - some are decimals (0.13), some are already percentages (13)
-        # Columns stored as decimals (need *100)
-        decimal_pct_cols = ['Acceptance Rate', 'Yield Rate', 'ED Acceptance Rate']
-        for col in decimal_pct_cols:
+        # Format percentages - all stored as 0-1 decimals, display as percentages
+        pct_cols = ['Acceptance Rate', 'Yield Rate', 'ED Acceptance Rate',
+                    '% International', '% In-State', '% Athletes']
+        for col in pct_cols:
             if col in export_df.columns:
                 export_df[col] = export_df[col].apply(lambda x: f"{x*100:.1f}%" if pd.notna(x) else "")
-
-        # Columns already stored as percentages (don't multiply)
-        already_pct_cols = ['% International', '% In-State', '% Athletes']
-        for col in already_pct_cols:
-            if col in export_df.columns:
-                export_df[col] = export_df[col].apply(lambda x: f"{x:.1f}%" if pd.notna(x) else "")
 
         # Format zones
         def format_zone_export(x):
@@ -689,7 +683,6 @@ def main():
                 with col2:
                     st.markdown("**Financial Aid**")
                     st.write(f"**% on Scholarship:** {format_acceptance_rate(uni_data.get('pct_scholarship'))}")
-                    st.write(f"**Avg Scholarship:** {format_currency(uni_data.get('avg_scholarship'))}")
 
                 with col3:
                     st.markdown("**Selectivity Zones**")
