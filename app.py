@@ -302,9 +302,10 @@ def main():
             - Niche College Rankings
             - CollegeVine Rankings
 
-            **University Statistics:**
-            - NCES IPEDS 2023-24
-            - College Navigator
+            **Admissions & Statistics:**
+            - NCES IPEDS 2023-24 (enrollment, test scores, costs)
+            - College Navigator (acceptance rates, yield)
+            - BigJ Consultancy Class of 2028 (ED acceptance rates)
             - Common Data Sets
             """)
 
@@ -319,22 +320,21 @@ def main():
         with right_col:
             st.subheader("📰 Recent Updates")
             st.markdown("""
+            **February 2026 - Data Quality & ED Rates**
+            - Imported Early Decision acceptance rates from BigJ Consultancy (Class of 2028) — 146 schools with ED rates, 159 with ED % of freshman class
+            - Fixed undergraduate enrollment data for 396 schools (was showing transfer-in numbers)
+            - Standardized all percentage columns to consistent format
+            - Added cross-validation checks for data integrity
+
             **February 2025 - Major Rankings Refresh**
             - Updated 50 subject categories to 2025-26 data
             - Added QS Subject Rankings 2025 (47 subjects)
-            - Added QS Global Rankings 2026
-            - Added Times Higher Ed Global & US National 2026
-            - Added US News National & Liberal Arts 2026
+            - Added QS/THE Global Rankings 2026, US News National & Liberal Arts 2026
             - Total: 6,100+ ranking entries across 56 categories
 
-            **February 2025 - Performance**
-            - Optimized memory usage for faster loading
-            - Added caching for ranking computations
-
             **January 2025 - Launch**
-            - 599 US universities
-            - 56 academic subject categories
-            - Custom weighted ranking algorithm
+            - 599 US universities, 56 academic categories
+            - Custom weighted ranking algorithm with multi-source averaging
             """)
 
             st.subheader("⚠️ Known Gaps")
