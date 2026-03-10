@@ -690,6 +690,9 @@ def main():
                     st.write(f"**CS/Eng:** {uni_data.get('selectivity_zone_cs_eng', 'N/A')}")
                     st.write(f"**Econ/Biz:** {uni_data.get('selectivity_zone_econ_biz', 'N/A')}")
                     st.write(f"**Premed:** {uni_data.get('selectivity_zone_premed', 'N/A')}")
+                    selectivity_note = uni_data.get('selectivity_notes', '')
+                    if pd.notna(selectivity_note) and str(selectivity_note).strip():
+                        st.caption(f"⚠️ {selectivity_note}")
 
                 with col4:
                     st.markdown("**Other**")
