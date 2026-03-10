@@ -143,7 +143,7 @@ def main():
 
     # Header
     st.markdown('<p class="main-header">US College Finder</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Discover the best-fit US universities based on your academic interests</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Discover the best-fit US universities based on your academic interests. Looking for UK courses instead? Check out <a href="https://uk-course-finder.streamlit.app/">UK Course Finder</a> (password: courses)</p>', unsafe_allow_html=True)
 
     # Reorganized category groups
     category_groups = {
