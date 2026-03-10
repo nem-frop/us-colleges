@@ -337,12 +337,18 @@ def main():
             - Custom weighted ranking algorithm with multi-source averaging
             """)
 
-            st.subheader("⚠️ Known Gaps")
+            st.subheader("⚠️ Known Gaps & Data Caveats")
             st.markdown("""
             **Rankings still on 2022 data:**
             - Pre-Med, Public Health, Public Policy
             - Film & Media, Engineering (general)
             - Social Sciences (2021)
+
+            **Acceptance & ED rate accuracy:**
+            - Acceptance rates and Early Decision rates are sourced from NCES, BigJ Consultancy, and other aggregators — not directly from Common Data Sets (CDS)
+            - Aggregator sources can differ from official CDS figures, sometimes significantly (we've seen discrepancies of 5-10+ percentage points on ED rates)
+            - For the most accurate admissions data, always cross-reference with the university's official CDS, typically published on their institutional research page
+            - We are working on a manual CDS audit for top schools — corrections will be applied as verified
 
             *Updates in progress - check back soon!*
             """)
