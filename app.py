@@ -509,6 +509,7 @@ def main():
             "Enrollment": {
                 'undergrad_enrollment': 'Undergrad Enrollment',
                 'grad_enrollment': 'Grad Enrollment',
+                'pct_white': '% White',
                 'pct_international': '% International',
                 'pct_in_state': '% In-State',
             },
@@ -599,6 +600,10 @@ def main():
             if col in export_df.columns:
                 export_df[col] = export_df[col].apply(lambda x: f"{x*100:.1f}%" if pd.notna(x) else "")
 
+        # Format pct_white separately (already on 0-100 scale)
+        if '% White' in export_df.columns:
+            export_df['% White'] = export_df['% White'].apply(lambda x: f"{x:.1f}%" if pd.notna(x) else "")
+
         # Format zones
         def format_zone_export(x):
             if pd.isna(x):
@@ -683,6 +688,8 @@ def main():
 
                 with col1:
                     st.markdown("**Student Body**")
+                    pct_white_val = uni_data.get('pct_white')
+                    st.write(f"**% White:** {f'{pct_white_val:.1f}%' if pd.notna(pct_white_val) else 'N/A'}")
                     st.write(f"**% International:** {format_acceptance_rate(uni_data.get('pct_international'))}")
                     st.write(f"**% In-State:** {format_acceptance_rate(uni_data.get('pct_in_state'))}")
 
