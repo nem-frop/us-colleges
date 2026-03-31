@@ -138,8 +138,6 @@ def extract_universities(xl: pd.ExcelFile) -> pd.DataFrame:
         'student_faculty_ratio', 'pct_disabilities', 'scholarship_recipients',
         'pct_scholarship', 'avg_scholarship', 'pct_in_state',
         'tuition_fees', 'room_board', 'total_expenses', 'salary_10yr',
-        'students_singapore', 'students_vietnam', 'students_malaysia',
-        'students_indonesia', 'students_thailand',
         'sports_revenue', 'sports_expenses', 'total_athletes', 'pct_athletes',
         'female_athletes', 'male_athletes'
     ]

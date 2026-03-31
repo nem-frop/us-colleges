@@ -526,6 +526,13 @@ def main():
                 'sports_revenue': 'Sports Revenue',
                 'sports_expenses': 'Sports Expenses',
             },
+            "International Enrollment (incl. graduates)": {
+                'students_singapore': 'Students (Singapore)',
+                'students_vietnam': 'Students (Vietnam)',
+                'students_malaysia': 'Students (Malaysia)',
+                'students_indonesia': 'Students (Indonesia)',
+                'students_thailand': 'Students (Thailand)',
+            },
         }
 
         # Add Subject Rankings as a special dynamic group (based on selected categories)
@@ -692,6 +699,13 @@ def main():
                     st.write(f"**% White:** {f'{pct_white_val:.1f}%' if pd.notna(pct_white_val) else 'N/A'}")
                     st.write(f"**% International:** {format_acceptance_rate(uni_data.get('pct_international'))}")
                     st.write(f"**% In-State:** {format_acceptance_rate(uni_data.get('pct_in_state'))}")
+
+                    st.markdown("**International Students** *(incl. graduates)*")
+                    st.write(f"**Singapore:** {uni_data.get('students_singapore', 'N/A')}")
+                    st.write(f"**Vietnam:** {uni_data.get('students_vietnam', 'N/A')}")
+                    st.write(f"**Malaysia:** {uni_data.get('students_malaysia', 'N/A')}")
+                    st.write(f"**Indonesia:** {uni_data.get('students_indonesia', 'N/A')}")
+                    st.write(f"**Thailand:** {uni_data.get('students_thailand', 'N/A')}")
 
                 with col2:
                     st.markdown("**Financial Aid**")
