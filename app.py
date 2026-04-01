@@ -491,6 +491,7 @@ def main():
             },
             "Admissions": {
                 'acceptance_rate': 'Acceptance Rate',
+                'admission_plans': 'Admission Plans',
                 'total_applicants': 'Total Applicants',
                 'yield_rate': 'Yield Rate',
                 'ed_acceptance_rate': 'ED Acceptance Rate',
@@ -674,6 +675,7 @@ def main():
 
                 with col3:
                     st.markdown("**Admissions**")
+                    st.write(f"**Admission Plans:** {uni_data.get('admission_plans', 'N/A')}")
                     st.write(f"**Acceptance Rate:** {format_acceptance_rate(uni_data.get('acceptance_rate'))}")
                     st.write(f"**ED Acceptance:** {format_acceptance_rate(uni_data.get('ed_acceptance_rate'))}")
                     st.write(f"**Applicants:** {format_number(uni_data.get('total_applicants'))}")
