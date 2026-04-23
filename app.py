@@ -345,10 +345,10 @@ def main():
             - Social Sciences (2021)
 
             **Acceptance & ED rate accuracy:**
-            - Acceptance rates and Early Decision rates are sourced from NCES, BigJ Consultancy, and other aggregators — not directly from Common Data Sets (CDS)
-            - Aggregator sources can differ from official CDS figures, sometimes significantly (we've seen discrepancies of 5-10+ percentage points on ED rates)
-            - For the most accurate admissions data, always cross-reference with the university's official CDS, typically published on their institutional research page
-            - We are working on a manual CDS audit for top schools — corrections will be applied as verified
+            - For **32 top target schools**, acceptance/ED/RD rates are now directly sourced from the latest official Common Data Sets (CDS). These appear with a ✓ **CDS-verified** badge on the school detail page and include: RD acceptance rate, % of class filled through ED, and international vs. domestic breakdowns.
+            - For **all other schools**, acceptance and ED rates are sourced from NCES, BigJ Consultancy, and other aggregators. These can differ from official CDS figures, sometimes by 5-10+ percentage points on ED rates.
+            - For the most accurate admissions data on non-verified schools, cross-reference with the university's official CDS, typically published on their institutional research page.
+            - CDS audit coverage will be expanded to additional schools over time.
 
             *Updates in progress - check back soon!*
             """)
@@ -674,14 +674,50 @@ def main():
                     st.write(f"**Campus:** {uni_data.get('campus_setting', 'N/A')}")
 
                 with col3:
-                    st.markdown("**Admissions**")
+                    # CDS-verified badge if we have official CDS data for this school
+                    is_cds = str(uni_data.get('acceptance_data_source', '')).strip() == 'CDS'
+                    admissions_header = "**Admissions**"
+                    if is_cds:
+                        admissions_header += "  :green-background[✓ CDS-verified]"
+                    st.markdown(admissions_header)
+
                     st.write(f"**Admission Plans:** {uni_data.get('admission_plans', 'N/A')}")
                     st.write(f"**Acceptance Rate:** {format_acceptance_rate(uni_data.get('acceptance_rate'))}")
-                    st.write(f"**ED Acceptance:** {format_acceptance_rate(uni_data.get('ed_acceptance_rate'))}")
+
+                    # Show RD rate alongside ED for CDS schools (true non-ED selectivity)
+                    rd_rate = uni_data.get('rd_acceptance_rate')
+                    if pd.notna(rd_rate):
+                        st.write(f"**RD Acceptance:** {format_acceptance_rate(rd_rate)}")
+
+                    st.write(f"**ED/EA Acceptance:** {format_acceptance_rate(uni_data.get('ed_acceptance_rate'))}")
+
+                    # % of class filled through ED (useful for ED strategy)
+                    ed_pct = uni_data.get('ed_pct_freshman')
+                    if pd.notna(ed_pct):
+                        st.write(f"**% Class via ED:** {format_acceptance_rate(ed_pct)}")
+
+                    # International vs domestic split (CDS schools only)
+                    intl_rate = uni_data.get('intl_acceptance_rate')
+                    dom_rate = uni_data.get('domestic_acceptance_rate')
+                    if pd.notna(intl_rate) or pd.notna(dom_rate):
+                        st.write(f"**Domestic / Intl:** {format_acceptance_rate(dom_rate)} / {format_acceptance_rate(intl_rate)}")
+
                     st.write(f"**Applicants:** {format_number(uni_data.get('total_applicants'))}")
                     st.write(f"**Yield:** {format_acceptance_rate(uni_data.get('yield_rate'))}")
                     st.write(f"**SAT:** {format_number(uni_data.get('sat_25_overall'))} - {format_number(uni_data.get('sat_75_overall'))}")
                     st.write(f"**ACT:** {format_number(uni_data.get('act_25'))} - {format_number(uni_data.get('act_75'))}")
+
+                    # CDS source link + caveats
+                    if is_cds:
+                        cds_url = uni_data.get('cds_url', '')
+                        cds_year = uni_data.get('cds_year', '')
+                        cds_notes = uni_data.get('acceptance_data_notes', '')
+                        if pd.notna(cds_url) and str(cds_url).strip():
+                            st.caption(f"Source: [CDS {cds_year}]({cds_url})")
+                        else:
+                            st.caption(f"Source: CDS {cds_year}")
+                        if pd.notna(cds_notes) and str(cds_notes).strip():
+                            st.caption(f"ℹ️ {cds_notes}")
 
                 with col4:
                     st.markdown("**Academics & Cost**")
