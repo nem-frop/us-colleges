@@ -345,12 +345,16 @@ def main():
             - Social Sciences (2021)
 
             **Acceptance & ED rate accuracy:**
-            - For **32 top target schools**, acceptance/ED/RD rates are now directly sourced from the latest official Common Data Sets (CDS). These appear with a ✓ **CDS-verified** badge on the school detail page and include: RD acceptance rate, % of class filled through ED, and international vs. domestic breakdowns.
+            - For **110 top target schools**, acceptance/ED/RD rates are sourced directly from the latest official Common Data Sets (CDS). These appear with a ✓ **CDS-verified** badge on the school detail page and include: RD acceptance rate, % of class filled through ED, in-state / out-of-state breakdown, international vs. domestic breakdown, and ED/EA applicant volume.
             - For **all other schools**, acceptance and ED rates are sourced from NCES, BigJ Consultancy, and other aggregators. These can differ from official CDS figures, sometimes by 5-10+ percentage points on ED rates.
-            - For the most accurate admissions data on non-verified schools, cross-reference with the university's official CDS, typically published on their institutional research page.
-            - CDS audit coverage will be expanded to additional schools over time.
+            - For the most accurate data on non-verified schools, cross-reference with the university's official CDS.
+            - CDS audit coverage will continue to expand.
 
-            *Updates in progress - check back soon!*
+            **What's new (Apr 2026):**
+            - 110 schools now CDS-verified (was 0): top 25 + most LACs + major publics
+            - New fields: RD rate, in-state vs. out-of-state acceptance, ED applicant volume — all exportable to CSV under "CDS-Verified Admissions Detail"
+            - Cleaned up `Admission Plans` column (e.g. Columbia now shows "ED" instead of "0", UC system explicitly labeled "RD only")
+            - Useful for Singapore applicants: in-state / OOS / international rates often differ dramatically from headline rate — e.g. UNC Chapel Hill is 15% overall but only **6.6% for OOS** applicants
             """)
 
         st.divider()
