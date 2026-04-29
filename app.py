@@ -494,8 +494,22 @@ def main():
                 'admission_plans': 'Admission Plans',
                 'total_applicants': 'Total Applicants',
                 'yield_rate': 'Yield Rate',
-                'ed_acceptance_rate': 'ED Acceptance Rate',
+                'ed_acceptance_rate': 'ED/EA Acceptance Rate',
                 'ed_to_rd_ratio': 'ED to RD Ratio',
+            },
+            "CDS-Verified Admissions Detail": {
+                'acceptance_data_source': 'Data Source',
+                'cds_year': 'CDS Year',
+                'rd_acceptance_rate': 'RD Acceptance Rate',
+                'ed_pct_freshman': '% Class via ED',
+                'instate_acceptance_rate': 'In-State Acceptance Rate',
+                'oos_acceptance_rate': 'Out-of-State Acceptance Rate',
+                'domestic_acceptance_rate': 'Domestic Acceptance Rate',
+                'intl_acceptance_rate': 'International Acceptance Rate',
+                'ed_applicants': 'ED/EA Applicants',
+                'ed_admitted': 'ED/EA Admitted',
+                'acceptance_data_notes': 'Data Notes',
+                'cds_url': 'CDS Source URL',
             },
             "Test Scores": {
                 'sat_25_overall': 'SAT 25th %ile',
@@ -602,8 +616,11 @@ def main():
                 )
 
         # Format percentages - all stored as 0-1 decimals, display as percentages
-        pct_cols = ['Acceptance Rate', 'Yield Rate', 'ED Acceptance Rate',
-                    '% International', '% In-State', '% Athletes']
+        pct_cols = ['Acceptance Rate', 'Yield Rate', 'ED/EA Acceptance Rate',
+                    '% International', '% In-State', '% Athletes',
+                    'RD Acceptance Rate', '% Class via ED',
+                    'In-State Acceptance Rate', 'Out-of-State Acceptance Rate',
+                    'Domestic Acceptance Rate', 'International Acceptance Rate']
         for col in pct_cols:
             if col in export_df.columns:
                 export_df[col] = export_df[col].apply(lambda x: f"{x*100:.1f}%" if pd.notna(x) else "")
@@ -702,7 +719,19 @@ def main():
                     if pd.notna(intl_rate) or pd.notna(dom_rate):
                         st.write(f"**Domestic / Intl:** {format_acceptance_rate(dom_rate)} / {format_acceptance_rate(intl_rate)}")
 
+                    # In-state vs out-of-state split (especially relevant for publics)
+                    instate_rate = uni_data.get('instate_acceptance_rate')
+                    oos_rate = uni_data.get('oos_acceptance_rate')
+                    if pd.notna(instate_rate) or pd.notna(oos_rate):
+                        st.write(f"**In-State / OOS:** {format_acceptance_rate(instate_rate)} / {format_acceptance_rate(oos_rate)}")
+
                     st.write(f"**Applicants:** {format_number(uni_data.get('total_applicants'))}")
+
+                    # ED/EA applicant counts (CDS schools only)
+                    ed_apps = uni_data.get('ed_applicants')
+                    ed_adm = uni_data.get('ed_admitted')
+                    if pd.notna(ed_apps) and pd.notna(ed_adm):
+                        st.write(f"**ED/EA Pool:** {format_number(ed_apps)} applied, {format_number(ed_adm)} admitted")
                     st.write(f"**Yield:** {format_acceptance_rate(uni_data.get('yield_rate'))}")
                     st.write(f"**SAT:** {format_number(uni_data.get('sat_25_overall'))} - {format_number(uni_data.get('sat_75_overall'))}")
                     st.write(f"**ACT:** {format_number(uni_data.get('act_25'))} - {format_number(uni_data.get('act_75'))}")
