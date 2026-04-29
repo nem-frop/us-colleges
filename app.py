@@ -352,7 +352,8 @@ def main():
 
             **What's new (Apr 2026):**
             - 110 schools now CDS-verified (was 0): top 25 + most LACs + major publics
-            - New fields: RD rate, in-state vs. out-of-state acceptance, ED applicant volume — all exportable to CSV under "CDS-Verified Admissions Detail"
+            - For these 110, **all admissions data** (acceptance/ED rates, applicant/admit/enroll counts, yield) now comes from official CDS PDFs, overriding older aggregator data
+            - New fields: RD rate, in-state vs. out-of-state acceptance, international acceptance rate, ED applicant volume — all exportable under "CDS-Verified Admissions Detail"
             - Cleaned up `Admission Plans` column (e.g. Columbia now shows "ED" instead of "0", UC system explicitly labeled "RD only")
             - Useful for Singapore applicants: in-state / OOS / international rates often differ dramatically from headline rate — e.g. UNC Chapel Hill is 15% overall but only **6.6% for OOS** applicants
             """)
@@ -510,6 +511,8 @@ def main():
                 'oos_acceptance_rate': 'Out-of-State Acceptance Rate',
                 'domestic_acceptance_rate': 'Domestic Acceptance Rate',
                 'intl_acceptance_rate': 'International Acceptance Rate',
+                'total_admitted': 'Total Admitted',
+                'total_enrolled': 'Total Enrolled',
                 'ed_applicants': 'ED/EA Applicants',
                 'ed_admitted': 'ED/EA Admitted',
                 'acceptance_data_notes': 'Data Notes',
