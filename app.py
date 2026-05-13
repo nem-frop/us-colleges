@@ -582,6 +582,7 @@ def main():
             "Basic Info",
             "Location",
             "Admissions",
+            "CDS-Verified Admissions Detail",
             "Test Scores",
             "Enrollment",
             "Cost & Outcomes",
