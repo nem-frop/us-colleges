@@ -136,10 +136,179 @@ def format_number(val):
     return f"{val:,.0f}"
 
 
+# ---------------------------------------------------------------------------
+# School Explorer (experimental tab)
+#
+# A fixed similarity "atlas" of 207 universities is precomputed offline by
+# analysis/build_atlas.py (t-SNE + clustering) and saved to explorer_atlas.csv.
+# At runtime the app only does a fast weighted-distance lookup -- no t-SNE, no
+# scikit-learn. The map never changes; only the highlighted neighbours do.
+# ---------------------------------------------------------------------------
+EXPLORER_META_COLS = {"ipeds_id", "name", "map_x", "map_y", "cluster", "cluster_name"}
+EXPLORER_PALETTE = ["#4C72B0", "#DD8452", "#55A868", "#C44E52",
+                    "#8172B3", "#937860", "#DA8BC3", "#7F7F7F"]
+EXPLORER_BOOST, EXPLORER_DAMP = 8.0, 0.3
+
+
+@st.cache_data
+def load_atlas():
+    """Load the precomputed similarity atlas (None if it hasn't been built)."""
+    path = Path(__file__).parent / "data" / "explorer_atlas.csv"
+    if not path.exists():
+        return None
+    return pd.read_csv(path).reset_index(drop=True)
+
+
+def explorer_neighbors(atlas, feature_cols, subject_cols, selected_cats, query_idx, k=5):
+    """5 nearest schools to query_idx, distance weighted by the selected subjects.
+
+    Returns (neighbour row indices, subjects actually used as the lens). The
+    atlas feature columns are already standardized, so this is a plain weighted
+    Euclidean distance -- a few milliseconds for all 207 schools.
+    """
+    X = atlas[feature_cols].to_numpy(dtype=float)
+    weights = np.ones(len(feature_cols))
+    selected = set(selected_cats)
+    boosted = [c for c in subject_cols if c in selected]
+    if boosted:
+        for j, col in enumerate(feature_cols):
+            if col in subject_cols:
+                weights[j] = EXPLORER_BOOST if col in selected else EXPLORER_DAMP
+    Xw = X * np.sqrt(weights)
+    dist = np.linalg.norm(Xw - Xw[query_idx], axis=1)
+    order = np.argsort(dist)
+    return [int(i) for i in order if i != query_idx][:k], boosted
+
+
+def explorer_figure(atlas, query_idx, neighbor_idxs):
+    """Plotly map: clusters in colour, the selected school + its matches on top."""
+    import plotly.graph_objects as go
+
+    fig = go.Figure()
+    q_cluster = int(atlas.loc[query_idx, "cluster"])
+
+    for c in sorted(atlas["cluster"].unique()):
+        sub = atlas[atlas["cluster"] == c]
+        colour = EXPLORER_PALETTE[(int(c) - 1) % len(EXPLORER_PALETTE)]
+        fig.add_trace(go.Scatter(
+            x=sub["map_x"], y=sub["map_y"], mode="markers",
+            name=str(sub["cluster_name"].iloc[0]),
+            marker=dict(color=colour, size=8 if c == q_cluster else 6),
+            opacity=0.95 if c == q_cluster else 0.22,
+            text=sub["name"], hovertemplate="%{text}<extra></extra>"))
+
+    qx = atlas.loc[query_idx, "map_x"]
+    qy = atlas.loc[query_idx, "map_y"]
+    lx, ly = [], []
+    for n in neighbor_idxs:
+        lx += [qx, atlas.loc[n, "map_x"], None]
+        ly += [qy, atlas.loc[n, "map_y"], None]
+    fig.add_trace(go.Scatter(x=lx, y=ly, mode="lines", showlegend=False,
+                             line=dict(color="#444", width=1.3), hoverinfo="skip"))
+
+    nb = atlas.loc[neighbor_idxs]
+    ncol = [EXPLORER_PALETTE[(int(c) - 1) % len(EXPLORER_PALETTE)]
+            for c in nb["cluster"]]
+    fig.add_trace(go.Scatter(
+        x=nb["map_x"], y=nb["map_y"], mode="markers", showlegend=False,
+        marker=dict(color=ncol, size=15, line=dict(color="#111", width=2)),
+        text=nb["name"], hovertemplate="%{text}<extra></extra>"))
+
+    fig.add_trace(go.Scatter(
+        x=[qx], y=[qy], mode="markers", showlegend=False,
+        marker=dict(color="#111", size=22, symbol="star",
+                    line=dict(color="white", width=1.5)),
+        text=[atlas.loc[query_idx, "name"]], hovertemplate="%{text}<extra></extra>"))
+
+    fig.update_layout(
+        height=560, plot_bgcolor="white",
+        xaxis=dict(visible=False), yaxis=dict(visible=False),
+        margin=dict(l=10, r=10, t=10, b=10),
+        legend=dict(orientation="h", yanchor="bottom", y=1.005, font=dict(size=10)))
+    return fig
+
+
+def render_explorer(atlas, universities_df, engine, selected_categories):
+    """Experimental tab: a fixed cluster 'atlas' + subject-weighted neighbours."""
+    st.subheader("School Explorer")
+    st.caption(
+        "Experimental. A fixed map of 207 universities (those with enough "
+        "subject-ranking data), grouped into 8 clusters. Pick a school to see "
+        "its 5 nearest matches — weighted by the academic areas you selected "
+        "in the sidebar. The map never moves; only the matches do.")
+
+    if atlas is None:
+        st.warning("Explorer data not found. Run `analysis/build_atlas.py` to "
+                   "generate `data/explorer_atlas.csv`.")
+        return
+
+    feature_cols = [c for c in atlas.columns if c not in EXPLORER_META_COLS]
+    category_names = set(engine.categories)
+    subject_cols = [c for c in feature_cols if c in category_names]
+
+    names_sorted = sorted(atlas["name"].tolist())
+    default = (names_sorted.index("Harvard University")
+               if "Harvard University" in names_sorted else 0)
+    choice = st.selectbox("Pick a university", names_sorted, index=default,
+                          key="explorer_school")
+    query_idx = int(atlas.index[atlas["name"] == choice][0])
+
+    neighbor_idxs, boosted = explorer_neighbors(
+        atlas, feature_cols, subject_cols, selected_categories, query_idx)
+
+    if boosted:
+        st.caption("Lens: matches weighted toward your selected areas — "
+                   f"**{', '.join(boosted)}**")
+    else:
+        st.caption("Lens: balanced — none of your selected areas are in the "
+                   "atlas, so all factors count equally.")
+
+    q = atlas.loc[query_idx]
+    same = sum(1 for n in neighbor_idxs
+               if atlas.loc[n, "cluster"] == q["cluster"])
+
+    left, right = st.columns([3, 2])
+    with left:
+        try:
+            st.plotly_chart(explorer_figure(atlas, query_idx, neighbor_idxs),
+                            use_container_width=True)
+        except ModuleNotFoundError:
+            st.error("This view needs the `plotly` package "
+                     "(add `plotly` to requirements.txt).")
+            return
+    with right:
+        st.markdown(f"### {q['name']}")
+        st.caption(f"Cluster: {q['cluster_name']}")
+        st.markdown(f"**{same} of {len(neighbor_idxs)}** nearest matches are in "
+                    "the same cluster.")
+        st.divider()
+        for n in neighbor_idxs:
+            row = atlas.loc[n]
+            uni = universities_df[universities_df["ipeds_id"] == row["ipeds_id"]]
+            bits = []
+            if not uni.empty:
+                u = uni.iloc[0]
+                if pd.notna(u.get("public_private")):
+                    bits.append(str(u["public_private"]))
+                loc = ", ".join(str(u[k]) for k in ("city", "state")
+                                if pd.notna(u.get(k)))
+                if loc:
+                    bits.append(loc)
+                if pd.notna(u.get("acceptance_rate")):
+                    bits.append(f"{u['acceptance_rate'] * 100:.0f}% acceptance")
+            tag = "same cluster" if row["cluster"] == q["cluster"] else "adjacent"
+            line = f"{row['cluster_name']} · {tag}"
+            if bits:
+                line += " · " + " · ".join(bits)
+            st.markdown(f"**{row['name']}**")
+            st.caption(line)
+
+
 def main():
     engine = load_engine()
     categories_df = load_categories()
     universities_df = get_universities_from_engine(engine)  # Reuse from engine, don't load twice
+    atlas_df = load_atlas()
 
     # Header
     st.markdown('<p class="main-header">US College Finder</p>', unsafe_allow_html=True)
@@ -404,7 +573,8 @@ def main():
     st.caption(f"Ranked by: {', '.join(selected_categories)}")
 
     # Tabs layout (About info moved to landing page)
-    tab1, tab2, tab3 = st.tabs(["Rankings", "University Details", "Export Data"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Rankings", "University Details", "Export Data", "🧭 Explore"])
 
     with tab1:
         # Clean table view - with Selectivity Zones prominently displayed
@@ -820,6 +990,9 @@ def main():
                             st.write(item)
                 else:
                     st.write("No subject ranking data available for selected categories.")
+
+    with tab4:
+        render_explorer(atlas_df, universities_df, engine, selected_categories)
 
     # Footer
     st.divider()
