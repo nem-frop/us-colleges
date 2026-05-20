@@ -228,14 +228,39 @@ def explorer_figure(atlas, query_idx, neighbor_idxs):
     return fig
 
 
-def render_explorer(atlas, universities_df, engine, selected_categories):
+def _explorer_neighbor(n, atlas, universities_df, query_cluster):
+    """Render one neighbour as a clickable button (click = navigate) + caption."""
+    row = atlas.loc[n]
+    if st.button(row["name"], key=f"explorer_nav_{n}", use_container_width=True):
+        st.session_state["explorer_nav_target"] = row["name"]
+        st.rerun()
+    tag = "same cluster" if row["cluster"] == query_cluster else "adjacent"
+    lines = [f"{row['cluster_name']} · {tag}"]
+    uni = universities_df[universities_df["ipeds_id"] == row["ipeds_id"]]
+    if not uni.empty:
+        u = uni.iloc[0]
+        extra = []
+        if pd.notna(u.get("public_private")):
+            extra.append(str(u["public_private"]))
+        loc = ", ".join(str(u[k]) for k in ("city", "state")
+                        if pd.notna(u.get(k)))
+        if loc:
+            extra.append(loc)
+        if pd.notna(u.get("acceptance_rate")):
+            extra.append(f"{u['acceptance_rate'] * 100:.0f}% acceptance")
+        if extra:
+            lines.append(" · ".join(extra))
+    st.caption("  \n".join(lines))
+
+
+def render_explorer(atlas, universities_df, engine, selected_categories, results):
     """Experimental tab: a fixed cluster 'atlas' + subject-weighted neighbours."""
     st.subheader("School Explorer")
     st.caption(
         "Experimental. A fixed map of 207 universities (those with enough "
-        "subject-ranking data), grouped into 8 clusters. Pick a school to see "
-        "its 5 nearest matches — weighted by the academic areas you selected "
-        "in the sidebar. The map never moves; only the matches do.")
+        "subject-ranking data), grouped into 8 clusters. Pick a school — or "
+        "click any match — to see its nearest matches, weighted by the academic "
+        "areas you selected in the sidebar.")
 
     if atlas is None:
         st.warning("Explorer data not found. Run `analysis/build_atlas.py` to "
@@ -246,15 +271,32 @@ def render_explorer(atlas, universities_df, engine, selected_categories):
     category_names = set(engine.categories)
     subject_cols = [c for c in feature_cols if c in category_names]
 
-    names_sorted = sorted(atlas["name"].tolist())
-    default = (names_sorted.index("Harvard University")
-               if "Harvard University" in names_sorted else 0)
-    choice = st.selectbox("Pick a university", names_sorted, index=default,
-                          key="explorer_school")
+    # Order the dropdown by the current ranking, so the default is the top
+    # school for the selected subjects (not alphabetical / not always Harvard).
+    atlas_names = set(atlas["name"])
+    if results is not None and not results.empty:
+        ranked_names = set(results["name"])
+        options = ([n for n in results["name"] if n in atlas_names]
+                   + sorted(n for n in atlas_names if n not in ranked_names))
+    else:
+        options = sorted(atlas_names)
+    # Key the selectbox on the selected categories: when the lens changes, the
+    # dropdown re-defaults to the new top-ranked school.
+    lens_key = "|".join(sorted(selected_categories))
+    selectbox_key = f"explorer_school::{lens_key}"
+    # Apply a pending click-to-navigate (set by a neighbour button) before the
+    # selectbox is created, so it can override the current selection.
+    nav = st.session_state.pop("explorer_nav_target", None)
+    if nav is not None and nav in options:
+        st.session_state[selectbox_key] = nav
+    choice = st.selectbox(
+        "Pick a university", options, index=0, key=selectbox_key,
+        help="Ordered by your selected-subject ranking — the top match is first.")
     query_idx = int(atlas.index[atlas["name"] == choice][0])
 
     neighbor_idxs, boosted = explorer_neighbors(
-        atlas, feature_cols, subject_cols, selected_categories, query_idx)
+        atlas, feature_cols, subject_cols, selected_categories, query_idx, k=10)
+    top5, more = neighbor_idxs[:5], neighbor_idxs[5:]
 
     if boosted:
         st.caption("Lens: matches weighted toward your selected areas — "
@@ -264,13 +306,12 @@ def render_explorer(atlas, universities_df, engine, selected_categories):
                    "atlas, so all factors count equally.")
 
     q = atlas.loc[query_idx]
-    same = sum(1 for n in neighbor_idxs
-               if atlas.loc[n, "cluster"] == q["cluster"])
+    same = sum(1 for n in top5 if atlas.loc[n, "cluster"] == q["cluster"])
 
     left, right = st.columns([3, 2])
     with left:
         try:
-            st.plotly_chart(explorer_figure(atlas, query_idx, neighbor_idxs),
+            st.plotly_chart(explorer_figure(atlas, query_idx, top5),
                             use_container_width=True)
         except ModuleNotFoundError:
             st.error("This view needs the `plotly` package "
@@ -279,29 +320,16 @@ def render_explorer(atlas, universities_df, engine, selected_categories):
     with right:
         st.markdown(f"### {q['name']}")
         st.caption(f"Cluster: {q['cluster_name']}")
-        st.markdown(f"**{same} of {len(neighbor_idxs)}** nearest matches are in "
-                    "the same cluster.")
+        st.markdown(f"**{same} of {len(top5)}** nearest matches are in the "
+                    "same cluster.")
+        st.caption("Click a school to explore its matches.")
         st.divider()
-        for n in neighbor_idxs:
-            row = atlas.loc[n]
-            uni = universities_df[universities_df["ipeds_id"] == row["ipeds_id"]]
-            bits = []
-            if not uni.empty:
-                u = uni.iloc[0]
-                if pd.notna(u.get("public_private")):
-                    bits.append(str(u["public_private"]))
-                loc = ", ".join(str(u[k]) for k in ("city", "state")
-                                if pd.notna(u.get(k)))
-                if loc:
-                    bits.append(loc)
-                if pd.notna(u.get("acceptance_rate")):
-                    bits.append(f"{u['acceptance_rate'] * 100:.0f}% acceptance")
-            tag = "same cluster" if row["cluster"] == q["cluster"] else "adjacent"
-            line = f"{row['cluster_name']} · {tag}"
-            if bits:
-                line += " · " + " · ".join(bits)
-            st.markdown(f"**{row['name']}**")
-            st.caption(line)
+        for n in top5:
+            _explorer_neighbor(n, atlas, universities_df, q["cluster"])
+        if more:
+            with st.expander(f"Show {len(more)} more similar schools"):
+                for n in more:
+                    _explorer_neighbor(n, atlas, universities_df, q["cluster"])
 
 
 def main():
@@ -992,7 +1020,7 @@ def main():
                     st.write("No subject ranking data available for selected categories.")
 
     with tab4:
-        render_explorer(atlas_df, universities_df, engine, selected_categories)
+        render_explorer(atlas_df, universities_df, engine, selected_categories, results)
 
     # Footer
     st.divider()
