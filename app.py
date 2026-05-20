@@ -195,6 +195,7 @@ def explorer_figure(atlas, query_idx, neighbor_idxs):
             name=str(sub["cluster_name"].iloc[0]),
             marker=dict(color=colour, size=8 if c == q_cluster else 6),
             opacity=0.95 if c == q_cluster else 0.22,
+            customdata=sub.index.tolist(),
             text=sub["name"], hovertemplate="%{text}<extra></extra>"))
 
     qx = atlas.loc[query_idx, "map_x"]
@@ -212,12 +213,14 @@ def explorer_figure(atlas, query_idx, neighbor_idxs):
     fig.add_trace(go.Scatter(
         x=nb["map_x"], y=nb["map_y"], mode="markers", showlegend=False,
         marker=dict(color=ncol, size=15, line=dict(color="#111", width=2)),
+        customdata=list(neighbor_idxs),
         text=nb["name"], hovertemplate="%{text}<extra></extra>"))
 
     fig.add_trace(go.Scatter(
         x=[qx], y=[qy], mode="markers", showlegend=False,
         marker=dict(color="#111", size=22, symbol="star",
                     line=dict(color="white", width=1.5)),
+        customdata=[query_idx],
         text=[atlas.loc[query_idx, "name"]], hovertemplate="%{text}<extra></extra>"))
 
     fig.update_layout(
@@ -228,10 +231,30 @@ def explorer_figure(atlas, query_idx, neighbor_idxs):
     return fig
 
 
+def _clicked_index(map_event):
+    """Atlas row index of the map point clicked via on_select, or None."""
+    if map_event is None:
+        return None
+    try:
+        points = map_event["selection"]["points"]
+    except (KeyError, TypeError, AttributeError):
+        return None
+    if not points:
+        return None
+    point = points[0]
+    cd = point.get("customdata") if hasattr(point, "get") else None
+    if isinstance(cd, (list, tuple)):
+        cd = cd[0] if cd else None
+    try:
+        return int(cd)
+    except (TypeError, ValueError):
+        return None
+
+
 def _explorer_neighbor(n, atlas, universities_df, query_cluster):
     """Render one neighbour as a clickable button (click = navigate) + caption."""
     row = atlas.loc[n]
-    if st.button(row["name"], key=f"explorer_nav_{n}", use_container_width=True):
+    if st.button(row["name"], key=f"explorer_nav_{n}"):
         st.session_state["explorer_nav_target"] = row["name"]
         st.rerun()
     tag = "same cluster" if row["cluster"] == query_cluster else "adjacent"
@@ -294,6 +317,12 @@ def render_explorer(atlas, universities_df, engine, selected_categories, results
         help="Ordered by your selected-subject ranking — the top match is first.")
     query_idx = int(atlas.index[atlas["name"] == choice][0])
 
+    # When the selected school changes (by dropdown, button or map click), drop
+    # the map's stale selection so the next map click registers cleanly.
+    if choice != st.session_state.get("explorer_prev_choice"):
+        st.session_state.pop("explorer_map", None)
+        st.session_state["explorer_prev_choice"] = choice
+
     neighbor_idxs, boosted = explorer_neighbors(
         atlas, feature_cols, subject_cols, selected_categories, query_idx, k=10)
     top5, more = neighbor_idxs[:5], neighbor_idxs[5:]
@@ -309,14 +338,28 @@ def render_explorer(atlas, universities_df, engine, selected_categories, results
     same = sum(1 for n in top5 if atlas.loc[n, "cluster"] == q["cluster"])
 
     left, right = st.columns([3, 2])
+    map_event = None
     with left:
         try:
-            st.plotly_chart(explorer_figure(atlas, query_idx, top5),
-                            use_container_width=True)
+            fig = explorer_figure(atlas, query_idx, top5)
         except ModuleNotFoundError:
             st.error("This view needs the `plotly` package "
                      "(add `plotly` to requirements.txt).")
             return
+        try:
+            map_event = st.plotly_chart(fig, key="explorer_map",
+                                        on_select="rerun",
+                                        use_container_width=True)
+        except TypeError:
+            # Streamlit < 1.35 has no on_select — show a non-clickable chart.
+            st.plotly_chart(fig, use_container_width=True)
+        st.caption("Tip: click any dot on the map to jump to that school.")
+
+    clicked = _clicked_index(map_event)
+    if clicked is not None and clicked != query_idx:
+        st.session_state["explorer_nav_target"] = atlas.loc[clicked, "name"]
+        st.rerun()
+
     with right:
         st.markdown(f"### {q['name']}")
         st.caption(f"Cluster: {q['cluster_name']}")
