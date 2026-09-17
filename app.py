@@ -14,6 +14,7 @@ import sys
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 from ranking_engine import RankingEngine
+from theme import NAVY, inject_theme, page_header
 
 # Page config
 st.set_page_config(
@@ -22,6 +23,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+inject_theme()
 
 
 def check_password():
@@ -43,44 +45,21 @@ def check_password():
         return True
 
     # Show login form
-    st.markdown("## US College Finder")
-    st.markdown("*Please log in to continue*")
+    _, mid, _ = st.columns([1, 2, 1])
+    with mid:
+        page_header("US College Finder", "Please log in to continue.",
+                    eyebrow="US college explorer")
 
-    password = st.text_input("Password", type="password", key="password_input")
+        password = st.text_input("Password", type="password", key="password_input")
 
-    if st.button("Log in", type="primary"):
-        if password == st.secrets["password"]:
-            st.session_state["authenticated"] = True
-            st.rerun()
-        else:
-            st.error("Incorrect password")
+        if st.button("Log in", type="primary"):
+            if password == st.secrets["password"]:
+                st.session_state["authenticated"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect password")
 
     return False
-
-# Custom CSS
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 2.8rem;
-        font-weight: 700;
-        color: #1E3A5F;
-        margin-bottom: 0.3rem;
-    }
-    .sub-header {
-        font-size: 1.2rem;
-        color: #555;
-        margin-bottom: 1.5rem;
-        font-style: italic;
-    }
-    .stMultiSelect [data-baseweb="tag"] {
-        background-color: #1E3A5F;
-    }
-    div[data-testid="stExpander"] details summary p {
-        font-weight: 600;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 
 @st.cache_resource(ttl=3600)
 def load_engine():
@@ -205,26 +184,26 @@ def explorer_figure(atlas, query_idx, neighbor_idxs):
         lx += [qx, atlas.loc[n, "map_x"], None]
         ly += [qy, atlas.loc[n, "map_y"], None]
     fig.add_trace(go.Scatter(x=lx, y=ly, mode="lines", showlegend=False,
-                             line=dict(color="#444", width=1.3), hoverinfo="skip"))
+                             line=dict(color=NAVY, width=1.3), hoverinfo="skip"))
 
     nb = atlas.loc[neighbor_idxs]
     ncol = [EXPLORER_PALETTE[(int(c) - 1) % len(EXPLORER_PALETTE)]
             for c in nb["cluster"]]
     fig.add_trace(go.Scatter(
         x=nb["map_x"], y=nb["map_y"], mode="markers", showlegend=False,
-        marker=dict(color=ncol, size=15, line=dict(color="#111", width=2)),
+        marker=dict(color=ncol, size=15, line=dict(color=NAVY, width=2)),
         customdata=list(neighbor_idxs),
         text=nb["name"], hovertemplate="%{text}<extra></extra>"))
 
     fig.add_trace(go.Scatter(
         x=[qx], y=[qy], mode="markers", showlegend=False,
-        marker=dict(color="#111", size=22, symbol="star",
+        marker=dict(color=NAVY, size=22, symbol="star",
                     line=dict(color="white", width=1.5)),
         customdata=[query_idx],
         text=[atlas.loc[query_idx, "name"]], hovertemplate="%{text}<extra></extra>"))
 
     fig.update_layout(
-        height=560, plot_bgcolor="white",
+        height=560, plot_bgcolor="white", paper_bgcolor="rgba(0,0,0,0)",
         xaxis=dict(visible=False), yaxis=dict(visible=False),
         margin=dict(l=10, r=10, t=10, b=10),
         legend=dict(orientation="h", yanchor="bottom", y=1.005, font=dict(size=10)))
@@ -382,8 +361,18 @@ def main():
     atlas_df = load_atlas()
 
     # Header
-    st.markdown('<p class="main-header">US College Finder</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Discover the best-fit US universities based on your academic interests. Looking for UK courses instead? Check out <a href="https://uk-course-finder.streamlit.app/">UK Course Finder</a> (password: courses)</p>', unsafe_allow_html=True)
+    page_header(
+        "US College Finder",
+        "Discover the best-fit US universities based on your academic interests.",
+        eyebrow="US college explorer",
+        stats=[
+            (str(len(universities_df)), "universities"),
+            (str(len(categories_df)), "academic categories"),
+            (f"{len(engine.rankings):,}", "ranking entries"),
+        ],
+    )
+    st.caption("Looking for UK courses instead? Check out the "
+               "[UK Course Finder](https://uk-course-finder.streamlit.app/) (password: courses).")
 
     # Reorganized category groups
     category_groups = {
