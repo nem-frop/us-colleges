@@ -1,8 +1,19 @@
 # Theme colours. Fonts and component styling live in src/theme.py.
+# backgroundColor is white so tables render on white; the cream page
+# background is applied by src/theme.py.
 [theme]
 base = "light"
 primaryColor = "#1B2A4A"
-backgroundColor = "#F7F3ED"
+backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0EAE0"
 textColor = "#1B2A4A"
 font = "sans serif"
+borderColor = "#E2DDD4"
+dataframeBorderColor = "#D5DAE3"
+dataframeHeaderBackgroundColor = "#EEF1F6"
+showWidgetBorder = true
+
+# Sidebar: white panel with cream input fields
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F7F3ED"
